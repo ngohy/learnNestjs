@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model BookingRoom {
+  id             Int      @id @default(autoincrement())
+  checkIn        DateTime @db.DateTime(0)
+  checkOut       DateTime @db.DateTime(0)
+  note           String?  @db.VarChar(255)
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  customer_id    Int
+  room_id        Int
+  numberCustomer Int
+  adult          Int?
+  child          Int?
+  baby           Int?
+  price          Int?
+  unit           String   @db.VarChar(255)
+  Users          Users    @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "BookingRoom_ibfk_1")
+  Room           Room     @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "BookingRoom_ibfk_2")
+
+  @@index([customer_id], map: "customer_id")
+  @@index([room_id], map: "room_id")
+}
+
+model Comments {
+  id          Int       @id @default(autoincrement())
+  room_id     Int?
+  customer_id Int?
+  datacomment String?   @db.VarChar(255)
+  rate        Int?
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  Users       Users?    @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comments_ibfk_1")
+  Room        Room?     @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comments_ibfk_2")
+
+  @@index([customer_id], map: "customercomment_id")
+  @@index([room_id], map: "idRoom")
+}
+
+model Image {
+  id       Int    @id @default(autoincrement())
+  room_id  Int
+  urlimage String @db.LongText
+  Room     Room   @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Image_ibfk_1")
+
+  @@index([room_id], map: "room_id")
+}
+
+model Location {
+  id       Int     @id @default(autoincrement())
+  location String  @db.VarChar(255)
+  provine  String? @db.VarChar(255)
+  nation   String? @db.VarChar(255)
+  image    String? @db.LongText
+  Room     Room[]
+}
+
+model Messages {
+  id         Int       @id @default(autoincrement())
+  user1      Int
+  user2      Int
+  message    String    @db.VarChar(1000)
+  send_id    Int
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  Users      Users     @relation(fields: [send_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Messages_ibfk_1")
+
+  @@index([send_id], map: "send_id")
+}
+
+model Room {
+  id             Int           @id @default(autoincrement())
+  nameRoom       String        @db.VarChar(255)
+  description    String?       @db.VarChar(255)
+  price          Int?
+  numberCustomer Int?
+  bedRoom        Int?
+  bed            Int?
+  bathRoom       Int?
+  washing        Boolean?
+  tivi           Boolean?
+  iron           Boolean?
+  airCondition   Boolean?
+  wifi           Boolean?
+  kitchen        Boolean?
+  parkingCar     Boolean?
+  pool           Boolean?
+  location_id    Int
+  BookingRoom    BookingRoom[]
+  Comments       Comments[]
+  Image          Image[]
+  Location       Location      @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Room_ibfk_1")
+  Typeroom       Typeroom[]
+
+  @@index([location_id], map: "location_id")
+}
+
+model Typeroom {
+  id       Int    @id @default(autoincrement())
+  room_id  Int
+  typeroom String @db.VarChar(255)
+  Room     Room   @relation(fields: [room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Typeroom_ibfk_1")
+
+  @@index([room_id], map: "room_id")
+}
+
+model Users {
+  id          Int           @id @default(autoincrement())
+  username    String        @db.VarChar(255)
+  gender      Boolean
+  phone       String        @db.VarChar(255)
+  email       String        @unique(map: "email") @db.VarChar(255)
+  password    String        @unique(map: "password") @db.VarChar(255)
+  role        String        @db.VarChar(10)
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  birthday    String?       @db.VarChar(255)
+  avatar      String?       @db.LongText
+  isRemove    Boolean
+  BookingRoom BookingRoom[]
+  Comments    Comments[]
+  Messages    Messages[]
+}
